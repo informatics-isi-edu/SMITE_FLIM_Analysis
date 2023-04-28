@@ -33,7 +33,7 @@ addpath("Functions"); %Change the path name to the location of "Function",
 %% Input Variables
 
 %dataFolder = "/Users/mathiasbigger/Documents/Mathias Edits/1";  % dataFolder: location of the folder that contains Data.
-dataFolder = "/home/hongsuda/git/TIC_FLIM_Analysis/data/CTRL";  % dataFolder: location of the folder that contains Data.
+dataFolder = "/home/hongsuda/git/TIC_FLIM_Analysis/data";  % dataFolder: location of the folder that contains Data.
 % Change to your folder where you store the data like:
 % dataFolder = "C:\User\20210823\Data"
 % Please do not put anything that is not the exported data in any
@@ -440,7 +440,7 @@ for i = 3: numel(imageFolder)  % Looping through the different individual folder
         
         G_sum = cat(1,G_sum,G_cur);
         S_sum = cat(1,S_sum,S_cur);
-        Name = cat(1, Name, imageFolder(i).name);
+        Name = cat(1, Name, string(imageFolder(i).name)); %% HT
         pixel_cur = numel(find(org_struct.int));
         effective_pixel_count = cat(1, effective_pixel_count, pixel_cur);
         %  Stroing the names, and the G, S for current value.
@@ -449,10 +449,11 @@ for i = 3: numel(imageFolder)  % Looping through the different individual folder
         end
     end
     G_avg=0;
-    for x=0:2
-    G_avg = G_avg+G_sum(length(G_sum)-x);
+    for x=0:2 %% HT: What is x? Is this the same as z?
+    %HT G_avg = G_avg+G_sum(length(G_sum)-x); G_avg = G_avg/3
+    G_avg = mean(G_sum) %HT
     end
-    G_averages = cat(1,G_averages,G_avg/3)
+    G_averages = cat(1,G_averages,G_avg)
 end
 
 %% Advanced Analysis for NADH metabolism analysis
@@ -474,13 +475,13 @@ end
 % S_int: The S cordinate for the Bound NADH. 
 % tao: The lifetime for the Bound NADH. 
 
-
-[Free_LEXT,G_int,S_int,tao] = lineExtensionMetabolism(G_averages, S_sum);
+%% HT: use G_sum instead of G_averages to match the dimensions of S_sum. Otherwise, it throws errors
+[Free_LEXT,G_int,S_int,tao] = lineExtensionMetabolism(G_sum, S_sum);
 %   This is for the Line Extension metabolism analyis.
-Free_LR = LinearRegression_Analysis(G_averages, S_sum);
+Free_LR = LinearRegression_Analysis(G_sum, S_sum);
 %   This is for the Linear Regression analysis.
 
 %% Output data folder
-DataTable=table(Name,effective_pixel_count, G_averages, S_sum, Free_LEXT,G_int,S_int,tao,Free_LR);
+DataTable=table(Name,effective_pixel_count, G_sum, S_sum, Free_LEXT,G_int,S_int,tao,Free_LR);
 writetable(DataTable,Excel_file,'Sheet',1)
 
