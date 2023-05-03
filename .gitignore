@@ -1,0 +1,16 @@
+.DS_Store
+node_modules
+
+# emacs backup files
+*~
+
+**/*.tmp
+
+# data and output folders
+data*
+SavedFigures
+Analysis.xlsx
+explore_tiff.m
+*.asv
+
+

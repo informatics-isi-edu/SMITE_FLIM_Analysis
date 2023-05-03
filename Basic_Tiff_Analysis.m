@@ -63,7 +63,7 @@ mask_analyzing = 0;      %If you wish to do analysis based on generated masks, a
 % Masking based on another input image for the same field of view
 % Only do it if you have another image collected to generate the mask.
 % If not, select 0 for all settings. Only one of the three procedures recomended here. Set zeros for others. .
-batch_threshold_mask = 0;       % Batch thresholding for creating masks
+batch_threshold_mask = 1;       % Batch thresholding for creating masks
 individual_threshold_mask = 0;  % individual thresholding for masks
 individual_draw_mask = 0;       % individual thresholding for masks.
 
@@ -150,9 +150,10 @@ else
     z_stack = 1;
 end
 
-batch_threshold_mask = 1;       % Batch thresholding for creating masks
-individual_threshold_mask = 0;  % individual thresholding for masks
-individual_draw_mask = 0;       % individual thresholding for masks.
+%% HT: duplicate with the above settings
+%batch_threshold_mask = 1;       % Batch thresholding for creating masks
+%individual_threshold_mask = 0;  % individual thresholding for masks
+%individual_draw_mask = 0;       % individual thresholding for masks.
 
 % Creat folder for saving images. 
 if store_image == 1
@@ -182,10 +183,12 @@ for i = 3: numel(imageFolder)  % Looping through the different individual folder
     %  i starts with three, as i=1 and 2 is the current directory and previous
     %  directory respectively, named ".", and ".."
     
-    disp("Reading in Data"); 
+    disp("--- Reading in Data"); 
     
     currentFolder = fullfile(imageFolder(i).folder,imageFolder(i).name);
-    
+
+    disp(currentFolder);   
+
     mask_folder = fullfile(currentFolder,"mask");  % create folder to store the masks
     if ~exist(mask_folder,'dir')
         mkdir(mask_folder)
@@ -203,9 +206,9 @@ for i = 3: numel(imageFolder)  % Looping through the different individual folder
     
     for z_cur = 1: z_stack
         
-        int = imread(fullfile(image_file(1).folder,image_file((z_cur-1)*3*total_detector+(NADH_dec-1)*3+1).name));
-        G = standardPhase( imread(fullfile(image_file(1).folder,image_file((z_cur-1)*3*total_detector+(NADH_dec-1)*3+2).name)));
-        S = standardPhase( imread(fullfile(image_file(1).folder,image_file((z_cur-1)*3*total_detector+(NADH_dec-1)*3+3).name)));
+        int = imread(fullfile(currentFolder,image_file((z_cur-1)*3*total_detector+(NADH_dec-1)*3+1).name));
+        G = standardPhase( imread(fullfile(currentFolder,image_file((z_cur-1)*3*total_detector+(NADH_dec-1)*3+2).name)));
+        S = standardPhase( imread(fullfile(currentFolder,image_file((z_cur-1)*3*total_detector+(NADH_dec-1)*3+3).name)));
         
         %  Data read in for int, G, and S; If necessaryly, addjust this according to
         %  your detector number for NADH.
@@ -447,12 +450,14 @@ for i = 3: numel(imageFolder)  % Looping through the different individual folder
         if z_analysis == 1
             z_num = cat(1,z_num,z_cur);    
         end
+
+        fprintf("Name: %s, z_cur:%d, G_cur: %f, S_cur:%f, pixel_cur: %d \n", imageFolder(i).name, z_cur, G_cur, S_cur, pixel_cur)
     end
     G_avg=0;
     for x=0:2 %% HT: What is x? Is this the same as z?
     %HT G_avg = G_avg+G_sum(length(G_sum)-x); G_avg = G_avg/3
-    G_avg = mean(G_sum) %HT
     end
+    G_avg = mean(G_sum, "omitmissing") %HT
     G_averages = cat(1,G_averages,G_avg)
 end
 
